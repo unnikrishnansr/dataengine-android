@@ -1,6 +1,7 @@
 ## Library Details
-Version	1.0.0
-Packaging	Android Module/Library
+|Version	|1.0.0|
+|-------|-------|
+|Packaging|	Android Module/Library|
 
 ## Integration & Initialization
 Import the “dataengine” module to project folder.
