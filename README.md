@@ -101,8 +101,8 @@ DataEngine.getInstance().sessionStart();
 #### screenEvent(String screenName, BaseEventMap map): 
 The screen method allows users to record whenever a user navigates to different screen of the application, along with additonal information about the page being visited. 
 
-```sh
 Usage example:
+```sh
 BaseEventMap map=new BaseEventMap();
 map.putValue("ContentId", "213442218882273");
 map.putValue("Title", "Sully");
@@ -115,9 +115,8 @@ DataEngine.getInstance().screenEvent("details_page", map);
 #### trackEvent(String action, String sourceName, BaseEventMap map):
 The track method allows users to record the actions of the users. Every triggered action have associated properties.
 
-
-```sh
 Usage example:
+```sh
 BaseEventMap map=new BaseEventMap();
 map.putValue("ContentId", "213442218882273");
 map.putValue("Title", "Sully");
