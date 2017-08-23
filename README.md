@@ -141,4 +141,10 @@ DataEngine.with(context).shutdown();
 ```
 
 
+## Change log v1.0.0
+* Completely removed aspect based concept for Android library.
+* Added further customization options to fine tune the library without need of new version.
+* Added built in user accessible methods such as Identify, Session, Screen and Track
+
+
 
