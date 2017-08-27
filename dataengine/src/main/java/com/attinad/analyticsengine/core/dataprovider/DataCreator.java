@@ -224,6 +224,8 @@ public class DataCreator {
                 Subdata.put(Constants.TIME_SPENT, dbEvent.getTimeSpent());
             if (!TextUtils.isEmpty(dbEvent.getPreviousScreenName()) && dbEvent.getEventType().equals(EventType.SCREEN.getEventType()))
                 Subdata.put(Constants.PREVIOUS_SCREEN, dbEvent.getPreviousScreenName());
+            if (!TextUtils.isEmpty(dbEvent.getPreviousScreenName()) && dbEvent.getEventType().equals(EventType.AUTO.getEventType()))
+                Subdata.put(Constants.PREVIOUS_SCREEN, dbEvent.getPreviousScreenName());
             if (!TextUtils.isEmpty(dbEvent.getPresentScreenName()))
                 Subdata.put(Constants.PRESENT_SCREEN, dbEvent.getPresentScreenName());
             if (dbEvent.getEventDuration() != null && !dbEvent.getEventDuration().equalsIgnoreCase(NULL))
