@@ -8,6 +8,7 @@ public enum EventType {
 
     TRACK("Track"),
     SCREEN("ScreenView"),
+    AUTO("ActivityView"),
     IDENTIFY("Identify"),
     SESSION("SessionStart");
 

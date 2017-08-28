@@ -43,6 +43,5 @@ public class Activity3 extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         DataEngine.getInstance().screenEvent("Page2", null);
-        DataEngine.getInstance().sessionStart();
     }
 }

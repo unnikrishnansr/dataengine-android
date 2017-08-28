@@ -11,6 +11,7 @@ import com.attinad.analyticsengine.core.dataprovider.DataCreator;
 import com.attinad.analyticsengine.core.datastore.model.DBEvents;
 import com.attinad.analyticsengine.core.eventinfo.EventType;
 import com.attinad.analyticsengine.core.exception.CrashExceptionHandler;
+import com.attinad.analyticsengine.core.manager.ActivityMonitor;
 import com.attinad.analyticsengine.core.manager.AnalyticsManager;
 import com.attinad.analyticsengine.core.manager.AppStateManager;
 import com.attinad.analyticsengine.core.manager.SharedPreferenceManager;
@@ -22,6 +23,10 @@ import com.google.gson.Gson;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -35,14 +40,25 @@ public class DataEngine {
 
     private static AnalyticsManager mAnalyticsManager;
 
+
+    //For manual screenevent configuration
     private static String currentScreenName = "";
     private static String previousScreenName = "";
-
     private static double currentTimestamp = 0;
     private static double previousTimestamp = 0;
 
+    //For auto screenevent configuration
+    private static String autoCurrentScreenName = "";
+    private static String autoPreviousScreenName = "";
+    private static double autoCurrentTimestamp = 0;
+    private static double autoPreviousTimestamp = 0;
+
 
     private String TAG = "DataEngine";
+    private ScheduledExecutorService se;
+
+    private ActivityMonitor am;
+    private Future<?> future;
 
     public static DataEngine with(Context ctx) {
         if (ctx == null) {
@@ -58,7 +74,8 @@ public class DataEngine {
     }
 
     private DataEngine() {
-
+        am = new ActivityMonitor(mContext);
+        se = Executors.newScheduledThreadPool(1);
     }
 
     /**
@@ -103,6 +120,7 @@ public class DataEngine {
      * @return instance
      */
     public DataEngine setAutoScreenCapture(boolean flag) {
+        AppStateManager.getInstance().initState(mContext, appStateForAuto);
         SharedPreferenceManager.getInstance(mContext).saveBool(Constants.AUTO_TRACK_SCREEN_EVENTS, flag);
         return this;
     }
@@ -157,6 +175,14 @@ public class DataEngine {
      */
     public void shutdown() {
         Log.v(TAG, "Shutdown initiated");
+        boolean auto = SharedPreferenceManager.getInstance(mContext).getBool(Constants.AUTO_TRACK_SCREEN_EVENTS, false);
+        if (auto) {
+            if (se != null) {
+                if (!se.isTerminated() || !se.isShutdown()) {
+                    se.shutdown();
+                }
+            }
+        }
         AppStateManager.getInstance().stopTrackingState();
         mAnalyticsManager.setEngineRunning(false);
     }
@@ -227,8 +253,13 @@ public class DataEngine {
         saveEvents(EventType.SCREEN, Params.BuiltInEvent.SCREENVIEW, screenName, map);
     }
 
-    public void sessionStart(){
-        if (mAnalyticsManager!=null){
+    public void autoScreenEvent(String screenName) {
+        Log.v(TAG, "Auto ScreenEvents");
+        saveAutoEvents(EventType.AUTO, Params.BuiltInEvent.SCREENVIEW, screenName, null);
+    }
+
+    public void sessionStart() {
+        if (mAnalyticsManager != null) {
             mAnalyticsManager.createUserSession();
         }
     }
@@ -293,4 +324,71 @@ public class DataEngine {
         mAnalyticsManager.newSaveEvents(events);
     }
 
+
+    protected void saveAutoEvents(EventType type, String param1, String sourceName, BaseEventMap map) {
+        Log.v(TAG, "Save auto events");
+        if (sourceName.isEmpty()) {
+            sourceName = Util.getApplicationName(mContext);
+        }
+
+        DataCreator dataCreator = DataCreator.from(mContext);
+        DBEvents events = new DBEvents();
+
+        autoPreviousScreenName = autoCurrentScreenName;
+        autoCurrentScreenName = sourceName;
+
+        autoPreviousTimestamp = autoCurrentTimestamp;
+        autoCurrentTimestamp = System.currentTimeMillis();
+
+        double timeDelta = autoCurrentTimestamp - autoPreviousTimestamp;
+        events.setEventDuration(Double.toString(timeDelta));
+
+        events.setUniqueId(dataCreator.getUniqueId());
+        events.setUserId(dataCreator.getUserId());
+        events.setPresentScreenName(sourceName);
+        events.setPreviousScreenName(autoPreviousScreenName);
+        events.setSessionId(dataCreator.getSessionId());
+        events.setTimeStamp(String.valueOf(Util.getCurrentTimeinMillis()));
+        if (dataCreator.getLoc() != null) {
+            events.setLatitude(String.valueOf(dataCreator.getLoc().optDouble("latitude")));
+            events.setLongitude(String.valueOf(dataCreator.getLoc().optDouble("longitude")));
+        }
+
+        events.setEventType(type.getEventType());
+        events.setEventName(param1);
+        mAnalyticsManager.newSaveEvents(events);
+    }
+
+    AppStateListener appStateForAuto = new AppStateListener() {
+        @Override
+        public void onAppDidEnterForeground() {
+            Log.v(TAG, "Adjusting auto state- Foreground");
+            boolean auto = SharedPreferenceManager.getInstance(mContext).getBool(Constants.AUTO_TRACK_SCREEN_EVENTS, false);
+            if (auto) {
+                if (am == null)
+                    am = new ActivityMonitor(mContext);
+
+                if (se == null)
+                    se = Executors.newScheduledThreadPool(1);
+                future = se.scheduleAtFixedRate(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (am != null)
+                            am.start();
+                    }
+                }, 2, 6, TimeUnit.SECONDS); //Scheduled executor service starting with 2secs delay and polling with 6 seconds time interval
+            }
+        }
+
+        @Override
+        public void onAppDidEnterBackground() {
+            Log.v(TAG, "Adjusting auto state- Background");
+            boolean auto = SharedPreferenceManager.getInstance(mContext).getBool(Constants.AUTO_TRACK_SCREEN_EVENTS, false);
+            if (future != null && auto) {
+                if (!future.isCancelled() || !future.isDone()) {
+                    future.cancel(true);
+                }
+            }
+        }
+    };
 }
