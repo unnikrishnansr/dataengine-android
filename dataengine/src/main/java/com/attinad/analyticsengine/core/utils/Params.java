@@ -10,6 +10,7 @@ public class Params {
         public static String SESSION_START = "sessionStart";
         public static String IDENTIFY = "identify";
         public static String SCREENVIEW = "screenView";
+        public static String AUTO = "activityView";
     }
 
     public static class CustomEvent {

@@ -255,7 +255,7 @@ public class DataEngine {
 
     public void autoScreenEvent(String screenName) {
         Log.v(TAG, "Auto ScreenEvents");
-        saveAutoEvents(EventType.AUTO, Params.BuiltInEvent.SCREENVIEW, screenName, null);
+        saveAutoEvents(EventType.SCREEN, Params.BuiltInEvent.AUTO, screenName, null);
     }
 
     public void sessionStart() {
