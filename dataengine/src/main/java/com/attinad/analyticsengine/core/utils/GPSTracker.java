@@ -211,11 +211,7 @@ public class GPSTracker extends Service implements LocationListener {
         alertDialog.show();
     }*/
 
-    /**
-     * Get list of address by latitude and longitude
-     *
-     * @return null or List<Address>
-     */
+
     public List<Address> getGeocoderAddress(Context context) {
         if (location != null) {
 
