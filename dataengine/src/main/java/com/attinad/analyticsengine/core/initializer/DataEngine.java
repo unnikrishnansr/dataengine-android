@@ -164,7 +164,7 @@ public class DataEngine {
     /**
      * Start the crash tracker
      */
-    public static void trackCrash() {
+    private void trackCrash() {
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CrashExceptionHandler)) {
             Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler(new CrashTracker()));
         }
