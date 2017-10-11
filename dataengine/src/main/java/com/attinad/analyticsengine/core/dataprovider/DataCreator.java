@@ -217,7 +217,7 @@ public class DataCreator {
             event.setDeviceInfo(getDeviceInfo());
             event.setOs(getOSInfo());
             event.setNetworkInfo(getNetworkInfo());
-            event.setLocation(new com.attinad.analyticsengine.core.datamodels.core.Location(dbEvent.getLatitude(), dbEvent.getLongitude()));
+            event.setLocation(new com.attinad.analyticsengine.core.datamodels.core.Location(dbEvent.getLongitude(), dbEvent.getLatitude()));
             HashMap<String, Object> Subdata = new HashMap<>();
             String NULL = "null";
             if (dbEvent.getTimeSpent() != null && !dbEvent.getTimeSpent().equalsIgnoreCase(NULL))

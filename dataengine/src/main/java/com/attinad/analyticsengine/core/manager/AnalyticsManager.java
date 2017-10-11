@@ -120,8 +120,6 @@ public class AnalyticsManager {
     }
 
 
-
-
     /**
      * Build event object for identify.
      *
@@ -161,18 +159,18 @@ public class AnalyticsManager {
             identify.put(Constants.APP_IDENTIFY, mDataCreator.getAppInfo());
             identify.put(Constants.NETWORK_IDENTIFY, mDataCreator.getNetworkInfo());
             identify.put(Constants.LOCATION, mDataCreator.getLocationInfo());
-
             identify.put(Constants.DATA_IDENTIFY, getUserHashMap());
 
-            jsonList.add(sessionObj);
+
             jsonList.add(identify);
+            jsonList.add(sessionObj);
+
             mainData.put(Constants.EVENTS_IDENTIFY, jsonList);
         } catch (Exception e) {
             e.printStackTrace();
         }
         onBuild.execute(mainData);
     }
-
 
 
     private void buildSessionObject(Callback<HashMap> onBuild) {
@@ -303,25 +301,25 @@ public class AnalyticsManager {
      * Flush Mechanism, timer set to flush the data to middleware
      */
     public void timer() {
-            final Handler handler = new Handler();
-            Timer timer = new Timer();
-            TimerTask doAsynchronousTask = new TimerTask() {
-                @Override
-                public void run() {
-                    handler.post(new Runnable() {
-                        public void run() {
-                            try {
-                                if (Util.isDataAvailable(mContext) && enableEngine) {
-                                    postData();
-                                }
-                            } catch (Exception e) {
-                                // TODO Auto-generated catch block
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask doAsynchronousTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            if (Util.isDataAvailable(mContext) && enableEngine) {
+                                postData();
                             }
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
                         }
-                    });
-                }
-            };
-            timer.schedule(doAsynchronousTask, 0, 10000); //execute in every 10000 ms
+                    }
+                });
+            }
+        };
+        timer.schedule(doAsynchronousTask, 0, 10000); //execute in every 10000 ms
     }
 
     public void setEngineRunning(boolean enableEngine) {
@@ -330,8 +328,8 @@ public class AnalyticsManager {
 
     private HashMap getUserHashMap() {
         Gson gson = new Gson();
-        String userId = mDataCreator.getUserId();
         String userMap = SharedPreferenceManager.getInstance(mContext).getData(Constants.USER_MAP);
+        boolean userLoginStatus = SharedPreferenceManager.getInstance(mContext).getBool(Constants.USER_LOGIN_STATUS, false);
         java.lang.reflect.Type type = new TypeToken<HashMap<String, String>>() {
         }.getType();
         HashMap<String, Object> userHashMap;
@@ -340,7 +338,7 @@ public class AnalyticsManager {
         } else {
             userHashMap = new HashMap<>();
         }
-        int userStatus = TextUtils.isEmpty(userId) ? 0 : 1;
+        int userStatus = (!userLoginStatus) ? 0 : 1;
         userHashMap.put(Constants.USER_STATUS, userStatus);
         return userHashMap;
     }
@@ -356,7 +354,10 @@ public class AnalyticsManager {
         createSession();
     }
 
-    String getSessionId() {
+    public String getSessionId() {
+        if (sessionId == null) {
+            sessionId = mDataCreator.getSessionId();
+        }
         return sessionId;
     }
 

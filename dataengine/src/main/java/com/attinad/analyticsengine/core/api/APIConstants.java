@@ -6,7 +6,7 @@ package com.attinad.analyticsengine.core.api;
 
 public class APIConstants {
 
-    public static final String BASE_URL="http://111.93.108.38:8089/Analytics";
-    public static final String BASE_PATH="/save";
+    public static final String BASE_URL="http://13.126.181.33:8086";
+    public static final String BASE_PATH="/event/device/log";
 
 }

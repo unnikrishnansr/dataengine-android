@@ -1,29 +1,5 @@
 apply plugin: 'com.android.library'
 
-ext {
-    bintrayRepo = 'DataEngine'
-    bintrayName = 'DataEngine'
-
-    publishedGroupId = 'com.attinad.analyticsengine.core'
-    libraryName = 'DataEngine'
-    artifact = 'DataEngine'
-
-    libraryDescription = 'Internal analytics and logger Engine.'
-
-    siteUrl = 'https://github.com/unnikrishnansr/dataengine-android'
-    gitUrl = 'https://github.com/unnikrishnansr/dataengine-android.git'
-
-    libraryVersion = '1.0.1'
-
-    developerId = 'unnikrishnansr'
-    developerName = 'Unnikrishnan S.R'
-    developerEmail = 'unnikrishnan.sr@attinadsoftware.com'
-
-    licenseName = 'The Apache Software License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    allLicenses = ["Apache-2.0"]
-}
-
 android {
     compileSdkVersion 26
     buildToolsVersion "26.0.0"
@@ -59,8 +35,3 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.1'
     compile 'io.reactivex:rxjava:1.2.5'
 }
-
-//Add these lines to publish library to bintray
-//Place it at the end of the file
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

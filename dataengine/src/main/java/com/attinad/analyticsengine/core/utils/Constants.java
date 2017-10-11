@@ -21,6 +21,7 @@ public interface Constants {
     String EVENT_ID = "eventId";
 
     String USER_ID = "user_id";
+    String USER_LOGIN_STATUS = "user_login_status";
     String USER_MAP = "user_map";
     String TIME_SPENT = "timeSpent";
     String LOCATION = "location";
@@ -60,4 +61,5 @@ public interface Constants {
     //Shared preference keys
     String SERVER_URL = "server_url";
     String AUTO_TRACK_SCREEN_EVENTS = "auto_track";
+
 }

@@ -8,6 +8,7 @@ import com.attinad.analyticsengine.core.appstate.AppStateListener;
 import com.attinad.analyticsengine.core.crashhandler.CrashTracker;
 import com.attinad.analyticsengine.core.datamodels.core.BaseEventMap;
 import com.attinad.analyticsengine.core.dataprovider.DataCreator;
+import com.attinad.analyticsengine.core.dataprovider.LibType;
 import com.attinad.analyticsengine.core.datastore.model.DBEvents;
 import com.attinad.analyticsengine.core.eventinfo.EventType;
 import com.attinad.analyticsengine.core.exception.CrashExceptionHandler;
@@ -125,6 +126,15 @@ public class DataEngine {
         return this;
     }
 
+    public DataEngine setLibraryVariant(LibType variant) {
+        String type = LibType.DEBUG.getType();
+        if (variant == LibType.PROD) {
+            type = LibType.PROD.getType();
+        }
+        SharedPreferenceManager.getInstance(mContext).saveData(Constants.LIB_VARIANT, type);
+        return this;
+    }
+
     public static DataEngine getInstance() {
         return instance;
     }
@@ -146,7 +156,7 @@ public class DataEngine {
     public void init(String servicename) {
         mAnalyticsManager = AnalyticsManager.getInstance(mContext, servicename);
         initializeTracker(mContext);
-        mAnalyticsManager.setContext(mContext, Util.getApplicationName(mContext));
+        mAnalyticsManager.setContext(mContext, servicename);
     }
 
 
@@ -164,7 +174,7 @@ public class DataEngine {
     /**
      * Start the crash tracker
      */
-    private void trackCrash() {
+    public static void trackCrash() {
         if (!(Thread.getDefaultUncaughtExceptionHandler() instanceof CrashExceptionHandler)) {
             Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler(new CrashTracker()));
         }
@@ -217,6 +227,16 @@ public class DataEngine {
         }
     }
 
+
+    /**
+     * Resets the library parameter
+     */
+    public void reset() {
+        Log.v(TAG, "Reset the library");
+        SharedPreferenceManager.getInstance(mContext).saveBool(Constants.USER_LOGIN_STATUS, false);
+        identifyEvent();
+    }
+
     /**
      * Trigger identify event
      */
@@ -234,6 +254,7 @@ public class DataEngine {
      */
     public void identifyEvent(String uid, BaseEventMap map) {
         Log.v(TAG, "Identify events with UID and MAP parameters");
+        SharedPreferenceManager.getInstance(mContext).saveBool(Constants.USER_LOGIN_STATUS, true);
         if (map != null && !map.isEmpty()) {
             HashMap<String, Object> traits = map.getPropertyMap();
             setUserId(uid, traits);
@@ -307,7 +328,7 @@ public class DataEngine {
         events.setUserId(dataCreator.getUserId());
         events.setPresentScreenName(sourceName);
         events.setPreviousScreenName(previousScreenName);
-        events.setSessionId(dataCreator.getSessionId());
+        events.setSessionId(mAnalyticsManager.getSessionId());
         events.setTimeStamp(String.valueOf(Util.getCurrentTimeinMillis()));
         if (dataCreator.getLoc() != null) {
             events.setLatitude(String.valueOf(dataCreator.getLoc().optDouble("latitude")));
@@ -347,7 +368,7 @@ public class DataEngine {
         events.setUserId(dataCreator.getUserId());
         events.setPresentScreenName(sourceName);
         events.setPreviousScreenName(autoPreviousScreenName);
-        events.setSessionId(dataCreator.getSessionId());
+        events.setSessionId(mAnalyticsManager.getSessionId());
         events.setTimeStamp(String.valueOf(Util.getCurrentTimeinMillis()));
         if (dataCreator.getLoc() != null) {
             events.setLatitude(String.valueOf(dataCreator.getLoc().optDouble("latitude")));
